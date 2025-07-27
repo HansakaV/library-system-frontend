@@ -15,7 +15,6 @@ interface FormErrors {
 
 const Login = () => {
   const [formData, setFormData] = useState<FormData>({
-
     email: "",
     password: "",
   })
@@ -49,15 +48,29 @@ const Login = () => {
     if (validateForm()) {
       setIsLoading(true)
       try {
-         await loginUser(formData)
-        toast.success("Login successful!")
+        const response = await loginUser(formData)
+        console.log("Login successful:", response)
+        console.log("Token stored:", localStorage.getItem('accessToken'))
+        console.log("User stored:", localStorage.getItem('user'))
+        
+        // Navigate to dashboard on successful login
+        toast.success(`Welcome back, ${response.name}!`)
+        
+        console.log("About to navigate to /dashboard")
         navigate("/dashboard")
-        //window.location.href = '/dashboard'
-
-        // Handle successful login (e.g., redirect, store token, etc.)
+        console.log("Navigate called")
+        
+        // Check if navigation worked after a delay
+        setTimeout(() => {
+          console.log("Current pathname:", window.location.pathname)
+          if (window.location.pathname !== "/dashboard") {
+            console.log("Navigation failed, trying window.location")
+            window.location.href = "/dashboard"
+          }
+        }, 500)
       } catch (error) {
         console.error("Login failed:", error)
-        // Handle login error (e.g., show error message)
+        toast.error("Login failed. Please check your credentials.")
         setErrors({ password: "Invalid email or password" })
       } finally {
         setIsLoading(false)

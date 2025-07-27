@@ -27,10 +27,20 @@ export const signUp = async (userData: User): Promise<SignUpResponse> => {
 export const login = async (loginData: Omit<User, "name">): Promise<LoginResponse> => {
     console.log("login called with loginData:", loginData)
     const response = await apiClient.post("/auth/login", loginData)
+    console.log("login response:", response.data)
+
+    if (response.data.accessToken) {
+        localStorage.setItem('accessToken', response.data.accessToken)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+    }
     return response.data
 }
 
 export const logout = async (): Promise<LogoutResponse> => {
+
+     localStorage.removeItem('accessToken')
+    localStorage.removeItem('user')
+    
     const response = await apiClient.post("/auth/logout")
     return response.data
 }
