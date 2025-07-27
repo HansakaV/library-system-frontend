@@ -66,7 +66,7 @@ Thank you for your cooperation.
 Best regards,
 Library Management System`
   });
-
+console.log(setEmailTemplate,readers,books,transactions)
   // Fetch all required data
   const fetchAllData = async () => {
     try {
@@ -193,11 +193,11 @@ Library Management System`
   }, []);
 
   // Calculate days overdue
-  const calculateDaysOverdue = (dueDate: string) => {
+  /* const calculateDaysOverdue = (dueDate: string) => {
     const today = new Date();
     const due = new Date(dueDate);
     return Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
-  };
+  }; */
 
   // Handle individual reader selection
   const handleReaderSelection = (readerId: string) => {
