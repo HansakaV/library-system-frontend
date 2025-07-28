@@ -1,6 +1,9 @@
 import axios, { AxiosError } from "axios"
 
-export const BASE_URL = "http://localhost:3000/api"
+// Use environment variable for production, fallback to localhost for development
+export const BASE_URL = import.meta.env.VITE_API_URL 
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : "http://localhost:3000/api"
 
 const apiClient = axios.create({
     baseURL: BASE_URL,
@@ -22,7 +25,9 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config // original request
-        if (error.response.status === 403 && !originalRequest._retry) {
+        
+        // Check if error.response exists before accessing status
+        if (error.response?.status === 403 && !originalRequest._retry) {
             originalRequest._retry = true
             try {
                 const result = await apiClient.post("/auth/refresh-token")
@@ -30,14 +35,17 @@ apiClient.interceptors.response.use(
                 setHeader(newAccessToken)
                 originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`
                 return apiClient(originalRequest)
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    if (error.response?.status === 401) {
+            } catch (refreshError) {
+                if (refreshError instanceof AxiosError) {
+                    if (refreshError.response?.status === 401) {
                         window.location.href = "/login"
                     }
                 }
             }
         }
+        
+        // Re-throw the error if it's not a 403 or refresh failed
+        return Promise.reject(error)
     }
 )
 
