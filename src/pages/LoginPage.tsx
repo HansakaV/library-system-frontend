@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { login as loginUser } from "../services/authService"
+import { useAuth } from "../context/useAuth" // Import your auth context
 import toast from "react-hot-toast"
 
 interface FormData {
@@ -21,6 +22,7 @@ const Login = () => {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth() // Get login function from context
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -49,29 +51,25 @@ const Login = () => {
       setIsLoading(true)
       try {
         const response = await loginUser(formData)
-        console.log("Login successful:", response)
-        console.log("Token stored:", localStorage.getItem('accessToken'))
-        console.log("User stored:", localStorage.getItem('user'))
+        console.log("Login response:", response)
         
-        // Navigate to dashboard on successful login
-        toast.success(`Welcome back, ${response.name}!`)
-        
-        console.log("About to navigate to /dashboard")
-        navigate("/dashboard")
-        console.log("Navigate called")
-        
-        // Check if navigation worked after a delay
-        setTimeout(() => {
-          console.log("Current pathname:", window.location.pathname)
-          if (window.location.pathname !== "/dashboard") {
-            console.log("Navigation failed, trying window.location")
-            window.location.href = "/dashboard"
-          }
-        }, 500)
+        if (response.status === 200) {
+          // Update authentication state FIRST
+          await login(response.accessToken)
+          
+          // Show success message
+          toast.success("Login successful!")
+          
+          // Navigate to dashboard AFTER auth state is updated
+          navigate("/dashboard", { replace: true })
+        } else {
+          toast.error("Login failed. Please check your credentials.")
+        }
+       
       } catch (error) {
         console.error("Login failed:", error)
-        toast.error("Login failed. Please check your credentials.")
         setErrors({ password: "Invalid email or password" })
+        toast.error("Login failed. Please check your credentials.")
       } finally {
         setIsLoading(false)
       }
