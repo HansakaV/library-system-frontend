@@ -53,7 +53,7 @@ const Login = () => {
         const response = await loginUser(formData)
         console.log("Login response:", response)
         
-        if (response.status === 200) {
+        if (Number(response.status) === 200) {
           // Update authentication state FIRST
           await login(response.accessToken)
           

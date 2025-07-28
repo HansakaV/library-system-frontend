@@ -8,6 +8,7 @@ export interface SignUpResponse {
 }
 
 export interface LoginResponse {
+    status: string
     name: string
     email: string
     accessToken: string
